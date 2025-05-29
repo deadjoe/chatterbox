@@ -5,8 +5,16 @@ import gradio as gr
 from chatterbox.tts import ChatterboxTTS
 
 
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+DEVICE = "mps" if torch.cuda.is_available() else "cpu"
+MAP_LOCATION = torch.device(DEVICE)
 
+# 修补 torch.load
+torch_load_original = torch.load
+def patched_torch_load(*args, **kwargs):
+    if 'map_location' not in kwargs:
+        kwargs['map_location'] = MAP_LOCATION
+    return torch_load_original(*args, **kwargs)
+torch.load = patched_torch_load
 
 def set_seed(seed: int):
     torch.manual_seed(seed)
@@ -17,13 +25,15 @@ def set_seed(seed: int):
 
 
 def load_model():
-    model = ChatterboxTTS.from_pretrained(DEVICE)
+	#model = ChatterboxTTS.from_pretrained(DEVICE)
+    model = ChatterboxTTS.from_local("./models", DEVICE)
     return model
 
 
 def generate(model, text, audio_prompt_path, exaggeration, temperature, seed_num, cfgw, min_p, top_p, repetition_penalty):
     if model is None:
-        model = ChatterboxTTS.from_pretrained(DEVICE)
+	    #model = ChatterboxTTS.from_pretrained(DEVICE)
+        model = ChatterboxTTS.from_local("./models", DEVICE)
 
     if seed_num != 0:
         set_seed(int(seed_num))
@@ -90,4 +100,4 @@ if __name__ == "__main__":
     demo.queue(
         max_size=50,
         default_concurrency_limit=1,
-    ).launch(share=True)
+    ).launch()
