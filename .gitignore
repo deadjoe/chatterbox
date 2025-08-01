@@ -46,3 +46,4 @@ checkpoints/
 
 # Ignore generated sample .wav files
 **/*.wav
+\n# Ignore private voice samples\nref_voice/
