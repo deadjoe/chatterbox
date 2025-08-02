@@ -5,7 +5,7 @@ import gradio as gr
 from chatterbox.tts import ChatterboxTTS
 
 
-DEVICE = "mps" if torch.cuda.is_available() else "cpu"
+DEVICE = "mps" if torch.backends.mps.is_available() else "cpu"
 MAP_LOCATION = torch.device(DEVICE)
 
 # 修补 torch.load
